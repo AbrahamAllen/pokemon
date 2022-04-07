@@ -1,0 +1,457 @@
+a{
+	color: black;
+	text-decoration: none;
+}
+#play{
+	text-align: center;
+	font-size: 30px;
+	position: absolute;
+	margin: auto;
+	top: 40%;
+	left: 40%;
+	width: 200px;
+	height: 100px;
+	background-color: green;
+	border-radius: 25px;
+}
+
+#tutorial{
+	text-align: center;
+	font-size: 30px;
+	position: absolute;
+	margin: auto;
+	top: 60%;
+	left: 40%;
+	width: 200px;
+	height: 100px;
+	background-color: green;
+	border-radius: 25px;
+}
+
+
+#battlefield{
+	
+	position: absolute;
+	border-style: solid; 
+	width: 500px;
+	height: 500px;
+}
+
+#map{
+	position: absolute;
+	border-style: solid;
+	
+	width: 2000px;
+	height: 2000px;
+	
+	background-image: url(background.png);
+}
+
+#tutorialmap{
+	position: absolute;
+	border-style: solid;
+	
+	width: 500px;
+	height: 1000px;
+	
+	background-image: url(background.png);
+}
+
+#inputHandle{
+	position: absolute;
+	border-style: solid;
+	
+	width: 2000px;
+	height: 2000px
+	
+}
+
+#tutorialInputHandle{
+	position: absolute;
+	border-style: solid;
+	
+	width: 500px;
+	height: 1000px;
+
+}
+
+#tutorialInstructions{
+	position: absolute;
+	left: 550px;
+	width: 500px;
+	height: 1000px;
+	
+	line-height: 50px;
+	background-image: url(tutorial.png);
+}
+
+
+
+#chooseStarter{
+	position: absolute;
+	border-style: solid; 
+	width: 700px;
+	height: 500px;
+	top: 700px;
+	left: 600px;
+}
+
+#done{
+	position: relative;
+	top: 80%;
+	margin: auto;
+	
+	width: 100px;
+	height: 100px;
+	
+	background-color: green;
+}
+
+
+
+#user{
+	position: absolute;
+	top: 900px;
+	left: 900px;
+	
+	width: 50px;
+	height: 50px;
+	
+	background-size: 50px;
+	background-repeat: no-repeat;
+}
+
+#playerStats{
+	position: absolute;
+	width: 300px;
+	height: 600px;
+	border-style: solid;
+}
+
+#swapHold{
+	position: absolute;
+	width: 100px;
+	height: 500px;
+	
+}
+
+.playerImage{
+	float: right;
+	width: 100px;
+	height: 150px;
+	background-repeat: no-repeat;
+}
+
+.statsDisplay{
+	float: left;
+	width: 200px;
+	height: 150px;
+}
+
+.button{
+	border-style: solid;
+	float: left;
+	width: 80px;
+	height: 50px;
+	margin: 10px;
+	font-size: 13px;
+}
+
+
+#player{
+	position: absolute;
+	top: 300px;
+	left: 300px;
+	width: 100px; 
+	height: 100px;
+	background-repeat: no-repeat;
+	
+	
+	text-align: center;
+	color: black;
+	
+}
+
+#enemy{
+	position: absolute;
+	top: 100px;
+	left: 100px;
+	width: 100px;
+	height: 100px;
+	background-repeat: no-repeat;
+	color: black;
+	text-align: center;
+}
+
+#boss{
+	position: absolute;
+	top: 100px;
+	left: 200px;
+	width: 200px;
+	height: 200px;
+	background-repeat: no-repeat;
+	color: black;
+	text-align: center;
+}
+
+#playermoves{
+	position: absolute;
+	top: 200px;
+	left: 500px;
+	width: 250px;
+	height: 300px; 
+	background-color: white;
+	border-style: solid;
+}
+
+#enemymoves{
+	position: absolute;
+	top: 0px;
+	left: -200px;
+	width: 200px;
+	height: 300px; 
+	background-color: white;
+	border-style: solid;
+	opacity: 0%;
+}
+
+#bossmoves{
+	position: absolute;
+	top: 0px;
+	left: -200px;
+	width: 200px;
+	height: 300px; 
+	background-color: white;
+	border-style: solid;
+}
+
+#battleText{
+	position: absolute;
+	top: 0px;
+	left: 500px;
+	width: 200px;
+	height: 200px; 
+	background-color: white;
+	border-style: solid;
+	color: black;
+}
+
+#eat{
+	background-image: url(eat.png);
+	position: absolute;
+	left: 100px;
+	top: 100px;
+	
+	width: 150px;
+	height: 75px;
+	
+	text-align: center;
+	line-height: 75px;
+	color: white;
+}
+
+#absorb{
+	background-image: url(absorb.png);
+	position: absolute;
+	left: 300px;
+	top: 100px;
+	
+	width: 150px;
+	height: 75px;
+	
+	text-align: center;
+	color: white;
+}
+
+#capture{
+	background-image: url(capture.png);
+	position: absolute;
+	left: 100px;
+	top: 300px;
+	
+	width: 150px;
+	height: 75px;
+	
+	text-align: center;
+	color: white;
+}
+.fire{
+	background-image: url(fire.gif);	color: white;
+}
+
+.fireborder{
+	background-image: url(fire.png);	color: white;
+}
+
+.water{
+	background-image: url(water.gif);	color: white;
+}
+.waterborder{
+	background-image: url(water.png);	color: white;
+}
+
+.earth{
+	background-image: url(earth.gif);	color: white;
+}
+.earthborder{
+	background-image: url(earth.png);	color: white;
+}
+
+.air{
+	background-image: url(air.gif);	color: white;
+}
+.airborder{
+	background-image: url(air.png);	color: white;
+}
+
+.acid{
+	background-image: url(acid.gif);	color: white;
+}
+.acidborder{
+	background-image: url(acid.png);	color: white;
+}
+
+.electric{
+	background-image: url(electric.gif);	color: white;
+}
+.electricborder{
+	background-image: url(electricborder.png);	color: white;
+}
+
+
+.none{
+	background-color: black;
+	color: white;
+}
+
+
+.heal{
+	background-color: green;
+}
+.level{
+	background-color: yellow;
+}
+.portal{
+	background-color: purple;
+}
+
+.snakefire{
+	background-image: url('snakefire.png');
+}
+
+.snakewater{
+	background-image: url('snakewater.png');
+}
+
+.snakeearth{
+	background-image: url('snakeearth.png');
+}
+
+.snakeair{
+background-image: url('snakeair.png');
+}
+
+.snakeacid{
+background-image: url('snakeacid.png');
+}
+
+.snakeelectric{
+background-image: url('snakeelectric.png');
+}
+
+.horsefire{
+	background-image: url('horsefire.png');
+}
+
+.horsewater{
+	background-image: url('horsewater.png');
+}
+
+.horseearth{
+	background-image: url('horseearth.png');
+}
+
+.horseair{
+background-image: url('horseair.png');
+}
+
+.horseacid{
+background-image: url('horseacid.png');
+}
+
+.horseelectric{
+background-image: url('horseelectric.png');
+}
+
+.catfire{
+	background-image: url('catfire.png');
+}
+
+.catwater{
+	background-image: url('catwater.png');
+}
+
+.catearth{
+	background-image: url('catearth.png');
+}
+
+.catair{
+background-image: url('catair.png');
+}
+
+.catacid{
+background-image: url('catacid.png');
+}
+
+.catelectric{
+background-image: url('catelectric.png');
+}
+
+.bearfire{
+	background-image: url('bearfire.png');
+}
+
+.bearwater{
+	background-image: url('bearwater.png');
+}
+
+.bearearth{
+	background-image: url('bearearth.png');
+}
+
+.bearair{
+background-image: url('bearair.png');
+}
+
+.bearacid{
+background-image: url('bearacid.png');
+}
+
+.bearelectric{
+background-image: url('bearelectric.png');
+}
+
+.wolffire{
+	background-image: url('wolffire.png');
+}
+
+.wolfwater{
+	background-image: url('wolfwater.png');
+}
+
+.wolfearth{
+	background-image: url('wolfearth.png');
+}
+
+.wolfair{
+background-image: url('wolfair.png');
+}
+
+.wolfacid{
+background-image: url('wolfacid.png');
+}
+
+.wolfelectric{
+background-image: url('wolfelectric.png');
+}
+
