@@ -41,8 +41,8 @@ a{
 	position: absolute;
 	border-style: solid;
 	
-	width: 2000px;
-	height: 2000px;
+	width: 3000px;
+	height: 3000px;
 	
 	background-image: url(background.png);
 }
@@ -61,8 +61,8 @@ a{
 	position: absolute;
 	border-style: solid;
 	
-	width: 2000px;
-	height: 2000px
+	width: 3000px;
+	height: 3000px
 	
 }
 
@@ -91,9 +91,17 @@ a{
 	position: absolute;
 	border-style: solid; 
 	width: 700px;
-	height: 500px;
-	top: 700px;
-	left: 600px;
+	height: 250px;
+	top: 1200px;
+	left: 1200px;
+}
+.elemSel{
+	border-style: solid;
+	border-color: green;
+}
+.shapeSel{
+	border-style: solid;
+	border-color: green;
 }
 
 #done{
@@ -223,6 +231,7 @@ a{
 	height: 300px; 
 	background-color: white;
 	border-style: solid;
+	opacity: 0%;
 }
 
 #battleText{
@@ -234,6 +243,7 @@ a{
 	background-color: white;
 	border-style: solid;
 	color: black;
+	
 }
 
 #eat{
@@ -250,7 +260,7 @@ a{
 	color: white;
 }
 
-#absorb{
+.absorb{
 	background-image: url(absorb.png);
 	position: absolute;
 	left: 300px;
