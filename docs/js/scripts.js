@@ -1,5 +1,5 @@
 function random(low, high){
-		return Math.round(Math.random()*high)+low;
+		return Math.round(Math.random()*(high-low))+low;
 }
 
 function write(txt, add=false){
@@ -59,15 +59,15 @@ class Monster{
 	kill(){
 		write('<br>'+this.id+' killed', true);
 		document.getElementById(this.id).remove();
-		if(this.id == 'player'){user.party.splice(this.slot, 1); document.getElementById('playermoves').remove();if(user.party.length == 0){gameOver()}; user.party[0].build(); user.activeMonster = user.party[0]};
-		if(this.id == 'enemy'){rewards(); user.enemy = false};
-		if(this.id == 'boss'){win()};
+		if(this.id == 'player'){user.party.splice(this.slot, 1); document.getElementById('playermoves').remove();if(user.party.length == 0){gameOver()}; user.party[0].build(); user.activeMonster = user.party[0]; user.slotOrg()};
+		if(this.id == 'enemy'){rewards(Math.ceil(this.stats.lvl/2)); user.enemy = false};
+		if(this.id == 'boss'){rewards(this.stats.lvl); user.enemy = false};
 		
 		console.log(user.party);
 	}
 	
-	expUp(){
-		this.stats.exp++;
+	expUp(amt){
+		this.stats.exp+=amt;
 		if(this.stats.exp >= 5*this.stats.lvl){this.levelUp(); this.stats.exp = 0};
 	}
 	
@@ -145,6 +145,7 @@ class Monster{
 		txt += 'speed '+this.stats.spd+'<br>';
 		txt += 'exp '+this.stats.exp+'<br>';
 		txt += 'lvl '+this.stats.lvl+'<br>';
+		txt += 'slot '+this.slot;
 		
 		return txt; 
 		
@@ -167,7 +168,7 @@ class Stats{
 		this.spd = 5;
 		
 		this.exp = 0;
-		this.lvl = 1;
+		this.lvl = scale;
 		
 		this.growth;
 		
@@ -206,8 +207,8 @@ class User{
 	constructor(){
 		this.id = 'user';
 		
-		this.x = 900;
-		this.y = 900;
+		this.x = 1500;
+		this.y = 1500;
 		
 		this.dx = 0;
 		this.dy = 0;
@@ -225,8 +226,8 @@ class User{
 	locate(x,y){
 		this.tx = x; this.ty = y;
 		if(this.tx == this.x && this.ty == this.y){return};
-		if(this.tx > this.x){this.dx = 10}else{this.dx = -10};
-		if(this.ty > this.y){this.dy = 10}else{this.dy = -10};
+		if(this.tx > this.x){this.dx = 20}else{this.dx = -20};
+		if(this.ty > this.y){this.dy = 20}else{this.dy = -20};
 	}
 	
 	move(){
@@ -271,6 +272,7 @@ class User{
 			div.id = i;
 			div.className = 'playerImage '+  monster.type.shape+monster.type.elem;
 			div.onclick = function(){
+			
 				user.party[parseInt(this.id)].build();
 				user.activeMonster = user.party[parseInt(this.id)];
 				document.getElementById('swapHold').remove();
@@ -278,6 +280,15 @@ class User{
 			i++;
 			document.getElementById('swapHold').appendChild(div);
 		}
+	}
+	
+	slotOrg(){
+		let i = 0;
+		for(let monster of this.party){
+			monster.slot = i;
+			i++;
+		}
+		this.activeMonster = this.party[0];
 	}
 	
 	
@@ -289,72 +300,74 @@ if(!user.inbattle){
 	
 	let x = event.clientX - rect.left;
 	let y = event.clientY - rect.top;
-	x=Math.floor(x/10)*10-30;
-	y=Math.floor(y/10)*10-30;
+	x=Math.floor(x/20)*20;
+	y=Math.floor(y/20)*20;
 
 	user.locate(x,y);
 }}
 
-const user = new User();
 
 
 //encounter creation and addition
-class Encounter{
-	constructor(elem = elemList[random(0, elemList.length-1)]){
-		this.id = random(1000, 9999).toString();
+class Biome{
+	constructor(x,y,elem = elemList[random(0, elemList.length-1)]){
+		this.id = random(1000, 9999);
 		
-		this.w = random(300, 400);
-		this.h = random(300, 400);
+		this.w = 1000;
+		this.h = 1000;
 		
-		this.x = random(10, 1990-this.w);
-		this.y = random(10, 1990-this.h);
+		this.x = x;
+		this.y = y;
 		
 		this.elem = elem;
 	}
+	
 	init(){
-		this.space();
-		this.makeParent();
 		let div = document.createElement('div');
 		div.id = this.id;
 		div.style.position = 'absolute';
 		div.style.width = this.w.toString()+'px';
 		div.style.height = this.h.toString()+'px';
-		div.style.left = (this.x+10).toString()+'px';
-		div.style.top = (this.y+10).toString()+'px';
+		div.style.left = (this.x).toString()+'px';
+		div.style.top = (this.y).toString()+'px';
+		div.className = this.elem + 'border';
+		document.getElementById('map').appendChild(div);
+		
+		this.makeEncounter();
+	}
+	
+	makeEncounter(){
+		let encounter = new Encounter(this.elem, this.x, this.y, this);
+		encounter.init();	
+	}
+}
+
+class Encounter{
+	constructor(elem = elemList[random(0, elemList.length-1)], x, y, biome){
+		this.id = random(1000, 9999).toString();
+		this.parent = biome;
+		this.level = user.level;
+		
+		this.w = random(400, 600);
+		this.h = random(400, 600);
+		
+		this.x = random(x, x+400);
+		this.y =random(y, y+400);
+		
+		this.elem = elem;
+	}
+	init(){
+		let div = document.createElement('div');
+		div.id = this.id;
+		div.style.position = 'absolute';
+		div.style.width = this.w.toString()+'px';
+		div.style.height = this.h.toString()+'px';
+		div.style.left = (this.x).toString()+'px';
+		div.style.top = (this.y).toString()+'px';
 		div.className = this.elem;
 		document.getElementById('map').appendChild(div);
 		
 		mapCol[this.id] = [this.x, this.y, this.w, this.h, this];
-	}
-	space(){
-		for(let encounter of Object.values(mapCol)){
-			while(this.col(encounter)){this.reroll()};
-		}	
-	}
-	col(encounter){
-		if(this.x > encounter[0] && this.x < encounter[0]+encounter[2] && this.y > encounter[1] && this.y < encounter[1]+encounter[3]){return true}
-		else if(this.x+this.w > encounter[0] && this.x+this.w < encounter[0]+encounter[2] && this.y > encounter[1] && this.y < encounter[1]+encounter[3]){return true}
-		else if(this.x > encounter[0] && this.x < encounter[0]+encounter[2] && this.y+this.h > encounter[1] && this.y+this.h < encounter[1]+encounter[3]){return true}
-		else if(this.x+this.w > encounter[0] && this.x+this.w < encounter[0]+encounter[2] && this.y+this.h > encounter[1] && this.y+this.h < encounter[1]+encounter[3]){return true}
-		else{return false};
-	}
-	reroll(){
-		console.log(this.id);
-		this.w = random(200, 300);
-		this.h = random(200, 300);
-		this.x = random(10, 1990-this.w);
-		this.y = random(10, 1990-this.h);
-	}
-	makeParent(){
-		let par = document.createElement('div');
-		par.id = this.id+'parent';
-		par.style.position = 'absolute';
-		par.style.width = (this.w+100).toString()+'px';
-		par.style.height = (this.h+100).toString()+'px';
-		par.style.left = (this.x-50).toString()+'px';
-		par.style.top = (this.y-50).toString()+'px';
-		par.className = this.elem+'border';
-		document.getElementById('map').appendChild(par);
 	}
 	
 	shrink(){
@@ -363,7 +376,7 @@ class Encounter{
 		this.x+=100;
 		this.y+=100;
 		
-		if(this.w < 100 || this.h < 100){document.getElementById(this.id).remove();delete mapCol[this.id]; return}
+		if(this.w < 100 || this.h < 100){this.finalEncounter(); return}
 		
 		document.getElementById(this.id).style.width = this.w.toString()+'px'; 
 		document.getElementById(this.id).style.height = this.h.toString()+'px';
@@ -373,18 +386,81 @@ class Encounter{
 		mapCol[this.id] = [this.x, this.y, this.w, this.h, this];
 	}
 	
+	finalEncounter(){
+		document.getElementById(this.id).remove();
+		delete mapCol[this.id];
+		
+		let boss = new bossEncounter(this.parent.x, this.parent.y, this.elem);
+		boss.init();
+	}
+	
+}
+
+class bossEncounter{
+	constructor(x, y, elem){
+		this.id = random(1000, 9999).toString()+'boss';
+		this.level = user.level+1;
+		
+		this.w = 180;
+		this.h = 180;
+		
+		this.x = random(x, x+700);
+		this.y = random(y, y+700);
+		
+		this.elem = elem;
+	}
+		init(){
+		let div = document.createElement('div');
+		div.id = this.id;
+		div.style.position = 'absolute';
+		div.style.width = this.w.toString()+'px';
+		div.style.height = this.h.toString()+'px';
+		div.style.left = (this.x).toString()+'px';
+		div.style.top = (this.y).toString()+'px';
+		div.className = this.elem;
+		document.getElementById('map').appendChild(div);
+		
+		mapCol[this.id] = [this.x, this.y, this.w, this.h, this];
+	}
+	
+	shrink(){
+		this.w = this.w/2;
+		this.h = this.h/2;
+		this.x+=100;
+		this.y+=100;
+		
+		if(this.w < 100 || this.h < 100){this.end(); return}
+		
+		document.getElementById(this.id).style.width = this.w.toString()+'px'; 
+		document.getElementById(this.id).style.height = this.h.toString()+'px';
+		document.getElementById(this.id).style.left = this.x.toString()+'px';
+		document.getElementById(this.id).style.top = this.y.toString()+'px';
+		
+		mapCol[this.id] = [this.x, this.y, this.w, this.h, this];
+	}
+	
+	end(){
+		document.getElementById(this.id).remove();
+		delete mapCol[this.id];
+	}
 }
 
 class Interactable{
-	constructor(type){
+	constructor(type, starter = true){
 		this.id = random(1000, 9999).toString();
 		this.type = type;
 		
 		this.w = 100;
 		this.h = 100;
 		
-		this.x = random(10, 1990-this.w);
-		this.y = random(10, 1990-this.h);
+		if(starter){
+			this.x = random(1000, 2000-this.w);
+			this.y = random(1000, 2000-this.h);
+		}else{
+			this.x = random(0, 2950);
+			this.y = random(0, 2950);
+		}
+		
 	}
 	
 	init(){
@@ -393,8 +469,8 @@ class Interactable{
 		div.style.position = 'absolute';
 		div.style.width = this.w.toString()+'px';
 		div.style.height = this.h.toString()+'px';
-		div.style.left = (this.x+10).toString()+'px';
-		div.style.top = (this.y+10).toString()+'px';
+		div.style.left = (this.x).toString()+'px';
+		div.style.top = (this.y).toString()+'px';
 		div.className = this.type;
 		document.getElementById('map').appendChild(div);
 		
@@ -403,6 +479,9 @@ class Interactable{
 	}
 	
 }
+
+
+
 
 //div creation for battle
 
@@ -416,8 +495,8 @@ function battle(player, encounter){
 	document.body.appendChild(div);
 	
 	player.build();
-	user.enemy = new Monster(user.level,encounter.elem,'enemy');
-	if(encounter.id == 'boss'){document.getElementById('boss').remove(); user.enemy.id = 'boss'};
+	if(encounter.id.includes('boss')){user.enemy = new Monster(encounter.level,encounter.elem,'boss')}
+	else{user.enemy = new Monster(encounter.level,encounter.elem,'enemy')}
 	user.enemy.build();
 	
 	
@@ -427,17 +506,18 @@ function battle(player, encounter){
 	user.inbattle = true;
 }
 
-function rewards(){
+function rewards(amt){
 	let eat = document.createElement('div');
 	eat.id = 'eat';
 	eat.innerHTML = 'Eat';
-	eat.onclick = function(){user.party[0].heal(); removeBattlefield()};
+	eat.onclick = function(){user.activeMonster.heal(); removeBattlefield()};
 	document.getElementById('battlefield').appendChild(eat);
 	
 	let absorb = document.createElement('div');
-	absorb.id = 'absorb';
+	absorb.className = 'absorb';
+	absorb.id = amt;
 	absorb.innerHTML = 'Absorb';
-	absorb.onclick = function(){user.party[0].expUp(); removeBattlefield()};
+	absorb.onclick = function(){user.activeMonster.expUp(parseInt(this.id)); removeBattlefield()};
 	document.getElementById('battlefield').appendChild(absorb);
 	
 	let capture = document.createElement('div');
@@ -447,6 +527,7 @@ function rewards(){
 	capture.innerHTML = 'Capture';
 	capture.onclick = function(){
 		user.killedMonster.stats.hp = user.killedMonster.stats.maxhp;
+		if(user.killedMonster.id == 'boss'){user.killedMonster.stats.lvl=0};
 		user.killedMonster.id = 'player';	
 		user.killedMonster.slot = user.party.length;
 		user.party.push(user.killedMonster); 
@@ -468,6 +549,8 @@ function playerAttack(move){
 	else{user.activeMonster.attack(move, user.enemy); user.enemy.attack(enemyMoves[random(0, enemyMoves.length-1)],user.activeMonster)};
 }
 
+
+
 function showStats(){
 	setTimeout(function(){user.dx = 0; user.dy = 0}, 10);
 	
@@ -482,7 +565,15 @@ function showStats(){
 	for(let monster in user.party){
 		let img = document.createElement('div');
 		img.className = 'playerImage ';
+		img.id = user.party[monster].slot;
 		img.className += user.party[monster].type.shape+user.party[monster].type.elem;
+		img.onclick = function(){
+			user.party.splice(0, 0, user.party[parseInt(this.id)]);
+			user.party.splice(parseInt(this.id)+1, 1);
+			user.slotOrg();
+			document.getElementById('user').className = user.party[0].type.shape+user.party[0].type.elem;
+			
+		}
 		document.getElementById('playerStats').appendChild(img);
 		
 		let stat = document.createElement('div');
@@ -501,21 +592,22 @@ setInterval(playerAnimate, 100);
 
 function makeMap(){
 	user.level++;
-	if(user.level == 10){bossLevel(); return}
-	let i = 0;
-	while(i < 5){
-		i++;
-		let div = new Encounter();
-		div.init();
+	for(let y = 0; y < 2001; y+=1000){
+		for(let x = 0; x < 2001; x+=1000){
+			if(x == 1000 && y == 1000){continue};
+			let biome = new Biome(x,y);
+			biome.init();
+		}
 	}
 	let heal = new Interactable('heal');
 	heal.init();
-	let level = new Interactable('level');
-	level.init();
+	let healb = new Interactable('heal');
+	healb.init();
 	let portal = new Interactable('portal');
 	portal.init();
 	
 	document.getElementById('user').className = user.party[0].type.shape+user.party[0].type.elem;
+	user.party[0].stats.lvl = 1;
 }
 
 
@@ -528,16 +620,6 @@ function nextFloor(){
 	makeMap();
 }
 
-function bossLevel(){
-	let boss = new Encounter();
-	boss.x = 700;
-	boss.y = 700;
-	boss.id = 'boss';
-	boss.init();
-	
-	document.getElementById(boss.id).innerHTML += 'BOSS';
-	document.getElementById(boss.id+'parent').remove();
-}
 
 
 function gameOver(){
@@ -550,6 +632,7 @@ function win(){
 function chooseStarter(){
 	let div = document.createElement('div');
 	div.id = 'chooseStarter';
+	div.innerHTML = 'CHOOSE ONE ELEMENT TYPE AND ONE ANIMAL SHAPE THEN CLICK THE GREEN BOX';
 	document.body.appendChild(div);
 	
 
@@ -559,7 +642,8 @@ function chooseStarter(){
 		elem.innerHTML = type;
 		elem.onclick = function(){
 			user.elemChoice = this.innerHTML;
-			alert(user.elemChoice);
+			for(let i of document.getElementsByClassName('elemSel')){i.className = i.className.replace('elemSel', '')};
+			this.className += ' elemSel';
 		}
 		document.getElementById('chooseStarter').appendChild(elem);
 	
@@ -571,7 +655,8 @@ function chooseStarter(){
 		shape.innerHTML = type;
 		shape.onclick = function(){
 			user.shapeChoice = this.innerHTML;
-			alert(user.shapeChoice);
+			for(let i of document.getElementsByClassName('shapeSel')){i.className = i.className.replace('shapeSel', '')};
+			this.className += ' shapeSel';
 		}
 		document.getElementById('chooseStarter').appendChild(shape);
 	
@@ -580,7 +665,6 @@ function chooseStarter(){
 	
 	let done = document.createElement('div');
 	done.id = 'done';
-	done.innerHTML = 'done';
 	done.onclick = function(){
 	if(user.elemChoice != undefined && user.shapeChoice != undefined){
 		document.getElementById('chooseStarter').remove();
@@ -589,9 +673,14 @@ function chooseStarter(){
 		user.party.push(monster);
 		makeMap();
 		user.activeMonster = user.party[0];
+			
 	}}
 	
 	document.getElementById('chooseStarter').appendChild(done);
 }
 
+
+
+const user = new User();
 chooseStarter();
+
