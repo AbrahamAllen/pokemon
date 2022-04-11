@@ -351,7 +351,8 @@ class User{
 		let bag = document.createElement('div');
 		bag.id = 'bag';
 		bag.onclick = function(){user.closeBag()};
-		document.getElementById('battlefield').appendChild(bag);
+		if(user.inbattle){document.getElementById('battlefield').appendChild(bag)}
+		else{alert(); document.getElementById('playerStats').appendChild(bag)};
 		let i = 0;
 		for(let item of user.bag){
 			let div = document.createElement('div');
@@ -438,6 +439,41 @@ function popup(txt, id, interaction){
 	document.getElementById('inputHandle').appendChild(div);
 	document.getElementById('popup').appendChild(yes);
 	document.getElementById('popup').appendChild(no);
+}
+
+function showStats(){
+	setTimeout(function(){user.dx = 0; user.dy = 0}, 10);
+	
+	let div = document.createElement('div');
+	div.id = 'playerStats';
+	div.innerHTML += 'you are on floor '+user.level;
+	div.style.left = (user.x-200).toString()+'px';
+	div.style.top = (user.y-200).toString()+'px';
+	div.onclick = function(){document.getElementById('playerStats').remove()};
+	document.body.appendChild(div);
+	
+	console.log(user.party);
+	for(let monster in user.party){
+		let img = document.createElement('div');
+		img.className = 'playerImage ';
+		img.id = user.party[monster].slot;
+		img.className += user.party[monster].type.shape+user.party[monster].type.elem;
+		img.onclick = function(){
+			user.party.splice(0, 0, user.party[parseInt(this.id)]);
+			user.party.splice(parseInt(this.id)+1, 1);
+			user.slotOrg();
+			document.getElementById('user').className = user.party[0].type.shape+user.party[0].type.elem;
+			
+		}
+		document.getElementById('playerStats').appendChild(img);
+		
+		let stat = document.createElement('div');
+		stat.className = 'statsDisplay';
+		stat.innerHTML = user.party[monster].statDisplay();
+		document.getElementById('playerStats').appendChild(stat);
+	}
+	
+	user.openBag();
 }
 
 //ITEMS 
@@ -718,38 +754,7 @@ function playerAttack(move){
 
 
 
-function showStats(){
-	setTimeout(function(){user.dx = 0; user.dy = 0}, 10);
-	
-	let div = document.createElement('div');
-	div.id = 'playerStats';
-	div.innerHTML += 'you are on floor '+user.level;
-	div.style.left = (user.x-200).toString()+'px';
-	div.style.top = (user.y-200).toString()+'px';
-	div.onclick = function(){document.getElementById('playerStats').remove()};
-	document.body.appendChild(div);
-	
-	console.log(user.party);
-	for(let monster in user.party){
-		let img = document.createElement('div');
-		img.className = 'playerImage ';
-		img.id = user.party[monster].slot;
-		img.className += user.party[monster].type.shape+user.party[monster].type.elem;
-		img.onclick = function(){
-			user.party.splice(0, 0, user.party[parseInt(this.id)]);
-			user.party.splice(parseInt(this.id)+1, 1);
-			user.slotOrg();
-			document.getElementById('user').className = user.party[0].type.shape+user.party[0].type.elem;
-			
-		}
-		document.getElementById('playerStats').appendChild(img);
-		
-		let stat = document.createElement('div');
-		stat.className = 'statsDisplay';
-		stat.innerHTML = user.party[monster].statDisplay();
-		document.getElementById('playerStats').appendChild(stat);
-	}
-}
+
 
 
 
