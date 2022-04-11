@@ -352,7 +352,7 @@ class User{
 		bag.id = 'bag';
 		bag.onclick = function(){user.closeBag()};
 		if(user.inbattle){document.getElementById('battlefield').appendChild(bag)}
-		else{alert(); document.getElementById('playerStats').appendChild(bag)};
+		else{document.getElementById('playerStats').appendChild(bag)};
 		let i = 0;
 		for(let item of user.bag){
 			let div = document.createElement('div');
