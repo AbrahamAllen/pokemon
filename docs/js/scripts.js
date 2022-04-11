@@ -8,8 +8,11 @@ function write(txt, add=false){
 }
 
 
+
+
 const elemList = ['fire', 'water', 'earth', 'air', 'acid', 'electric'];
-const weakDict = new Object(); weakDict['fire'] = 'water, air';weakDict['water'] = 'electric, air';weakDict['earth'] = 'fire, acid'; weakDict['air'] = 'earth, electric '; weakDict['acid'] = 'water'; weakDict['electric'] = 'earth, fire';
+const weakDict = new Object(); weakDict['fire'] = 'water, air';weakDict['water'] = 'electric, air';weakDict['earth'] = 'fire, acid'; weakDict['air'] = 'earth, electric '; weakDict['acid'] = 'water'; weakDict['electric'] = 'earth';
+const strongDict = new Object(); strongDict['fire'] = 'electric, fire'; strongDict['water'] = 'fire, acid'; strongDict['earth'] = 'electric, air'; strongDict['air'] = 'acid'; strongDict['electric'] = 'electric'; strongDict['acid'] = 'earth, acid';
 const shapeList = ['snake', 'wolf', 'horse', 'bear', 'cat'];
 const mapCol = new Object();
 
@@ -36,18 +39,21 @@ class Monster{
 	
 	//comabt functions
 	attack(move, target){
+	if(this.stats.hp > 0){	
 		if(target.stats.hp <= 0){write('<br>enemy killed <br> Click to continue'); return};
 		let txt = move.innerText.split('/'); console.log(txt[0]); let amt = parseInt(txt[1]);
 
 		if(random(0,100)<txt[2]){ write('<br>'+this.id+ ' used '+txt[0], true); target.damage(amt*this.stats.atk, this.type.elem)}
 		else{write('<br>'+this.id +' missed', true)}
-	}
+	}}
 	
 	damage(amt, elem){
-		let dmg = amt-this.stats.def;
+		let dmg = amt;
 		if(this.type.weak.includes(elem)){dmg+=dmg; write('<br> super effective', true)};
-		this.stats.hp-=dmg;
-		write('<br>did '+dmg+' damage', true);
+		if(this.type.strong.includes(elem)){Math.round(dmg-=(dmg/2)); write('<br> not very effective', true)};
+		dmg = dmg-this.stats.def;
+		if(dmg<=0){write('<br> blocked', true)}
+		else{this.stats.hp-=dmg; write('<br>did '+dmg+' damage', true)};
 		document.getElementById(this.id).innerHTML = this.stats.hp;
 		if(this.stats.hp <= 0){this.kill()}
 	}
@@ -60,7 +66,7 @@ class Monster{
 		write('<br>'+this.id+' killed', true);
 		document.getElementById(this.id).remove();
 		if(this.id == 'player'){user.party.splice(this.slot, 1); document.getElementById('playermoves').remove();if(user.party.length == 0){gameOver()}; user.party[0].build(); user.activeMonster = user.party[0]; user.slotOrg()};
-		if(this.id == 'enemy'){rewards(Math.ceil(this.stats.lvl/2)); user.enemy = false};
+		if(this.id == 'enemy'){user.activeMonster.stats.killcount++; rewards(Math.ceil(this.stats.lvl/2)); user.enemy = false};
 		if(this.id == 'boss'){rewards(this.stats.lvl); user.enemy = false};
 		
 		console.log(user.party);
@@ -81,10 +87,10 @@ class Monster{
 		this.stats.hp = this.stats.maxhp;
 		
 		
-		if(this.stats.lvl == 2){this.moves.push(moveDict[this.type.shape][1])};
-		if(this.stats.lvl == 4){this.moves.push(moveDict[this.type.elem][0])};
-		if(this.stats.lvl == 6){this.moves.push(moveDict[this.type.shape][2])};
-		if(this.stats.lvl == 8){this.moves.push(moveDict[this.type.elem][1])};
+		if(this.stats.lvl == 2 && !this.moves.includes(moveDict[this.type.shape][1])){this.moves.push(moveDict[this.type.shape][1])};
+		if(this.stats.lvl == 4 && !this.moves.includes(moveDict[this.type.shape][1])){this.moves.push(moveDict[this.type.elem][0])};
+		if(this.stats.lvl == 6 && !this.moves.includes(moveDict[this.type.shape][1])){this.moves.push(moveDict[this.type.shape][2])};
+		if(this.stats.lvl == 8 && !this.moves.includes(moveDict[this.type.shape][1])){this.moves.push(moveDict[this.type.elem][1])};
 	
 		
 		alert('LEVEL UP');
@@ -145,7 +151,7 @@ class Monster{
 		txt += 'speed '+this.stats.spd+'<br>';
 		txt += 'exp '+this.stats.exp+'<br>';
 		txt += 'lvl '+this.stats.lvl+'<br>';
-		txt += 'slot '+this.slot;
+		txt += this.type.elem;
 		
 		return txt; 
 		
@@ -157,6 +163,7 @@ class Type{
 		this.elem = elem;
 		this.shape = shape; 
 		this.weak = weakDict[this.elem];
+		this.strong = strongDict[this.elem];
 	}
 }
 
@@ -171,6 +178,8 @@ class Stats{
 		this.lvl = scale;
 		
 		this.growth;
+		
+		this.killcount = 0;
 		
 		switch(shape){
 			case 'snake': this.def+=2; this.growth = [10,1,3,0]; break; 
@@ -246,9 +255,9 @@ class User{
 		for(let encounter of Object.values(mapCol)){
 			if(this.x > encounter[0] && this.x < encounter[0]+encounter[2] && this.y > encounter[1] && this.y < encounter[1]+encounter[3]){
 				
-				if(encounter[4].type == 'heal'){user.party[0].heal(); document.getElementById(encounter[4].id).remove(); delete mapCol[encounter[4].id]; return;};
+				if(encounter[4].type == 'heal'){popup('heal your monster?', 'heal', encounter[4].id); return;};
 				if(encounter[4].type == 'level'){user.party[0].levelUp(); document.getElementById(encounter[4].id).remove(); delete mapCol[encounter[4].id]; return};
-				if(encounter[4].type == 'portal'){alert('next floor'); nextFloor(); return};
+				if(encounter[4].type == 'portal'){popup('go to next floor?', 'portal', undefined); return};
 				if(random(0, 1000) > 800){
 					user.dx = 0; user.dy = 0;
 					encounter[4].shrink();
@@ -294,6 +303,11 @@ class User{
 	
 }
 
+function playerAnimate(){
+	user.move();
+}
+setInterval(playerAnimate, 100);
+
 function getTarget(){
 if(!user.inbattle){	
 	let rect = event.target.getBoundingClientRect();
@@ -305,6 +319,40 @@ if(!user.inbattle){
 
 	user.locate(x,y);
 }}
+
+
+function popup(txt, id, interaction){
+	user.dx = 0;
+	user.dy = 0;
+	user.inbattle = true;
+	
+	let div = document.createElement('div');
+	div.innerHTML = txt;
+	div.id = 'popup';
+	div.style.left = (user.x-100).toString()+'px';
+	div.style.top = (user.y-100).toString()+'px';
+	div.onclick = function(){setTimeout(function(){user.inbattle = false}, 100)}
+	
+	let yes = document.createElement('div');
+	yes.innerHTML = 'yes';
+	yes.className = 'yes';
+	
+		
+	let no = document.createElement('div');
+	no.innerHTML = 'no';
+	no.className = 'no';
+	no.onclick = function(){document.getElementById('popup').remove()};
+	
+	switch(id){
+		case 'heal': yes.onclick = function() {user.party[0].heal(); document.getElementById('popup').remove(); delete mapCol[interaction]; document.getElementById(interaction).remove()}; break; 
+		case 'portal': yes.onclick = function(){nextFloor();  document.getElementById('popup').remove()}; break;
+	}
+	
+		
+	document.getElementById('inputHandle').appendChild(div);
+	document.getElementById('popup').appendChild(yes);
+	document.getElementById('popup').appendChild(no);
+}
 
 
 
@@ -551,11 +599,15 @@ function playerAttack(move){
 
 
 
+
+
+
 function showStats(){
 	setTimeout(function(){user.dx = 0; user.dy = 0}, 10);
 	
 	let div = document.createElement('div');
 	div.id = 'playerStats';
+	div.innerHTML += 'you are on floor '+user.level;
 	div.style.left = (user.x-200).toString()+'px';
 	div.style.top = (user.y-200).toString()+'px';
 	div.onclick = function(){document.getElementById('playerStats').remove()};
@@ -584,10 +636,13 @@ function showStats(){
 }
 
 
-function playerAnimate(){
-	user.move();
-}
-setInterval(playerAnimate, 100);
+
+
+
+
+
+
+
 
 
 function makeMap(){
@@ -607,7 +662,7 @@ function makeMap(){
 	portal.init();
 	
 	document.getElementById('user').className = user.party[0].type.shape+user.party[0].type.elem;
-	user.party[0].stats.lvl = 1;
+
 }
 
 
@@ -622,12 +677,18 @@ function nextFloor(){
 
 
 
+
+
 function gameOver(){
 	alert('you lose');
 }
 function win(){
 	alert('you win');
 }
+
+
+
+
 
 function chooseStarter(){
 	let div = document.createElement('div');
@@ -673,7 +734,7 @@ function chooseStarter(){
 		user.party.push(monster);
 		makeMap();
 		user.activeMonster = user.party[0];
-			
+		user.party[0].stats.lvl = 1;
 	}}
 	
 	document.getElementById('chooseStarter').appendChild(done);
