@@ -73,6 +73,7 @@ a{
 	height: 3000px;
 	
 	background-image: url(background.png);
+	overflow: scroll;
 }
 
 #tutorialmap{
