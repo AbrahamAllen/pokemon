@@ -286,7 +286,7 @@ class User{
 	}
 	
 	move(){
-		window.scrollTo(this.x-this.x-window.visualViewport.width/2, this.y-window.innerHeight/2);
+		window.scrollTo(this.x-this.x-window.innerWidth/2, this.y-window.innerHeight/2);
 		
 		let div = document.getElementById(this.id);
 		if(this.tx == this.x){this.dx = 0};
