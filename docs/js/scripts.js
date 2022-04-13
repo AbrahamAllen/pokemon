@@ -45,18 +45,26 @@ class Monster{
 	if(this.stats.hp > 0 && this.longStatus()){	
 		if(target.stats.hp <= 0){write('<br>enemy killed <br> Click to continue'); return};
 	
-		let txt = move.innerText.split('/'); console.log(txt[0]); let amt = parseInt(txt[1]);
+		let txt = move.innerText.split('/'); console.log(txt[0]); let amt = parseInt(txt[1]); let acc = parseInt(txt[2]);
+		if(this.stats.status == 'air'){acc-=15; write('<br>unsteady, lose  accuracey', true)}
+		amt = amt+Math.floor(this.stats.killcount/25);
+		if(random(0,100)<acc){
+			write('<br>'+this.id+ ' used '+txt[0], true); 
+			target.damage(amt*(this.stats.atk/2), this.type.elem)
+			
+			if(!txt[3]){txt.push('3')};
+			if(random(15,100) < this.stats.affinity*parseInt(txt[3]) && target.stats.status == 'none'){
+				target.stats.status = this.type.elem; 
+				write('<br>' +statusDict[this.type.elem] + ' applied', true); 
+				target.applyStatus(statusDict[this.type.elem])}
 
-		if(random(0,100)<txt[2]){ write('<br>'+this.id+ ' used '+txt[0], true); target.damage(amt*this.stats.atk, this.type.elem)}
-		else{write('<br>'+this.id +' missed', true)}
+		}else{write('<br>'+this.id +' missed', true)}
 		
-		if(!txt[3]){txt.push('3')};
-		if(random(25,100) < this.stats.affinity*parseInt(txt[3]) && target.stats.status == 'none'){target.stats.status = this.type.elem; write('<br>' +statusDict[this.type.elem] + ' applied', true); this.applyStatus(statusDict[this.type.elem])}
 	}}
 	
 	damage(amt, elem){
-		console.log(Math.floor(this.stats.killcount/25));
-		let dmg = amt+Math.floor(this.stats.killcount/25);
+	
+		let dmg = amt;
 		if(this.stats.status == 'earth'){dmg+=5; write('<br>spiked, bonus damage', true)};
 		if(this.type.weak.includes(elem)){dmg+=dmg; write('<br> super effective', true)};
 		if(this.type.strong.includes(elem)){Math.round(dmg-=(dmg/2)); write('<br> not very effective', true)};
@@ -103,7 +111,7 @@ class Monster{
 		if(this.stats.lvl == 8 && !this.moves.includes(moveDict[this.type.elem][1])){this.moves.push(moveDict[this.type.elem][1])};
 	
 		
-		alert('LEVEL UP');
+		popup('LEVEL UP', 'levelUp', undefined);
 	}
 	
 	//create div on battlefield
@@ -162,14 +170,15 @@ class Monster{
 	statDisplay(){
 		let txt = '';
 		
-		txt += 'health '+this.stats.hp+'<br>';
-		txt += 'attack '+this.stats.atk+'<br>';
-		txt += 'defense '+this.stats.def+'<br>';
-		txt += 'speed '+this.stats.spd+'<br>';
-		txt += 'affinity '+this.stats.affinity+'<br>';
-		txt += 'exp '+this.stats.exp+'<br>';
-		txt += 'lvl '+this.stats.lvl+'<br>';
-		txt += this.type.elem;
+		txt += 'health '+this.stats.hp;
+		txt += '::::'+this.type.elem+'<br>';
+		txt += 'attack '+this.stats.atk;
+		txt += '::::defense '+this.stats.def+'<br>';
+		txt += 'speed '+this.stats.spd;
+		txt += '::::affinity '+this.stats.affinity+'<br>';
+		txt += 'exp '+this.stats.exp;
+		txt += '::::lvl '+this.stats.lvl+'<br>';
+	
 		
 		return txt; 
 		
@@ -181,8 +190,8 @@ class Monster{
 	
 	longStatus(){
 		switch(this.stats.status){
-			case 'fire': this.stats.hp-=2; write('<br>burn damage applied', true); break;
-			case 'acid' : this.stats.hp-=Math.floor(this.stats.maxhp/8); write('<br>poisin damage applied', true);break;
+			case 'fire': this.stats.hp-=Math.floor(this.stats.maxhp/10); write('<br>'+Math.floor(this.stats.maxhp/10)+' burn damage applied', true); break;
+			case 'acid' : this.stats.hp-=Math.floor(this.stats.maxhp/5); write('<br>'+Math.floor(this.stats.maxhp/5)+' poisin damage applied', true);break;
 			case 'electric' : if(random(0, 100)> 60){write('<br>shocked! cant move', true); return false}else{break};
 			default : break;
 		}
@@ -226,11 +235,11 @@ class Stats{
 		this.status = 'none';
 		
 		switch(shape){
-			case 'snake': this.def+=2; this.growth = [10,1,3,0,3]; break; 
+			case 'snake': this.def+=2; this.affinity+=2; this.growth = [10,1,3,0,3]; break; 
 			case 'wolf': this.spd++; this.atk++; this.growth = [10, 2, 1, 1,2]; break; 
 			case 'horse': this.spd++; this.def++; this.growth = [10, 1, 2, 2,1]; break; 
 			case 'bear': this.def++; this.maxhp+=5; this.growth = [15, 1, 2, 0,1]; break;
-			case 'cat': this.spd++; this.atk++; this.growth = [10, 2, 0, 2,2]; break; 
+			case 'cat': this.spd++; this.atk++; this.affinity+=1; this.growth = [10, 2, 0, 2,2]; break; 
 		}
 		
 		switch(elem){
@@ -352,11 +361,11 @@ class User{
 		bag.id = 'bag';
 		bag.onclick = function(){user.closeBag()};
 		if(user.inbattle){document.getElementById('battlefield').appendChild(bag)}
-		else{document.getElementById('playerStats').appendChild(bag)};
+		else{bag.style.left = '300px'; bag.style.top = '100px';document.getElementById('playerStats').appendChild(bag)};
 		let i = 0;
 		for(let item of user.bag){
 			let div = document.createElement('div');
-			div.className = 'button '+item.type;
+			div.className = 'berry '+item.type;
 			div.innerHTML = item.amt;
 			div.id = i; i++;
 			div.onclick = function(){
@@ -374,11 +383,12 @@ class User{
 	}
 	
 	berryCheck(encounter){
+	if(user.bag.length < 10){
 	if(random(1000, 10000) > 9500 && encounter.berries > 0){
 		this.bag.push(new Berry(random(10, 10*this.level), encounter.elem));
 		popup('found berry!', 'berry', undefined);
 		encounter.berries--;
-	}}
+	}}}
 	
 }
 
@@ -401,6 +411,8 @@ if(!user.inbattle){
 
 
 function popup(txt, id, interaction){
+	if(document.getElementById('popup')){document.getElementById('popup').remove()};
+	
 	user.dx = 0;
 	user.dy = 0;
 	user.inbattle = true;
@@ -436,6 +448,15 @@ function popup(txt, id, interaction){
 			return
 		}
 		
+	if(id == 'levelUp'){
+		div.onclick = function(){
+			setTimeout(function(){user.inbattle = false}, 100); 
+			document.getElementById('popup').remove()
+			}
+			document.getElementById('inputHandle').appendChild(div);
+			return
+	}
+		
 	document.getElementById('inputHandle').appendChild(div);
 	document.getElementById('popup').appendChild(yes);
 	document.getElementById('popup').appendChild(no);
@@ -443,12 +464,13 @@ function popup(txt, id, interaction){
 
 function showStats(){
 	setTimeout(function(){user.dx = 0; user.dy = 0}, 10);
+	if(document.getElementById('playerStats')){document.getElementById('playerStats').remove()};
 	
 	let div = document.createElement('div');
 	div.id = 'playerStats';
 	div.innerHTML += 'you are on floor '+user.level;
-	div.style.left = (user.x-200).toString()+'px';
-	div.style.top = (user.y-200).toString()+'px';
+	div.style.left = (user.x-300).toString()+'px';
+	div.style.top = (user.y-150).toString()+'px';
 	div.onclick = function(){document.getElementById('playerStats').remove()};
 	document.body.appendChild(div);
 	
@@ -486,7 +508,7 @@ class Berry {
 	}
 	apply(monster){
 		console.log(monster);
-		monster.stats.hp+=10;
+		monster.stats.hp+=this.amt;
 		if(monster.stats.hp > monster.stats.maxhp){monster.stats.hp = monster.stats.maxhp};
 		document.getElementById(monster.id).innerHTML = monster.stats.hp;
 		write('used berry, healed for ' + this.amt);
@@ -725,7 +747,7 @@ function rewards(amt){
 	capture.onclick = function(){
 	if(user.party.length < 3){
 		user.killedMonster.stats.hp = user.killedMonster.stats.maxhp;
-		if(user.killedMonster.id == 'boss'){user.killedMonster.stats.lvl=0};
+		if(user.killedMonster.id == 'boss'){user.killedMonster.stats.lvl=1};
 		user.killedMonster.id = 'player';	
 		user.killedMonster.slot = user.party.length;
 		user.party.push(user.killedMonster); 
